@@ -38,6 +38,38 @@ app.get('/generate-resi', async (req, res) => {
         // Membuka tab baru (jauh lebih enteng daripada buka browser baru)
         page = await browser.newPage();
 
+        // 👇 LOGIKA PINTAR KHUSUS PLN (Baru Ditambahkan) 👇
+        let htmlNama = "";
+        let labelTujuan = "No Tujuan";
+        let labelSN = "SERIAL NUMBER (SN)";
+        let finalSN = sn || '-';
+
+        // Deteksi otomatis kalau produknya ada tulisan "PLN"
+        if (produk && produk.toUpperCase().includes('PLN')) {
+            labelTujuan = "ID Pelanggan";
+            labelSN = "SERIAL NUMBER (SN/TOKEN)";
+            
+            // Memecah SN Digiflazz untuk ambil Token dan Nama
+            if (sn && sn.includes('/')) {
+                const snParts = sn.split('/');
+                
+                // 1. Ambil 20 digit token, kasih strip (-) biar rapi
+                let tokenRaw = snParts[0].replace(/[^0-9]/g, ''); 
+                if (tokenRaw.length === 20) {
+                    finalSN = tokenRaw.match(/.{1,4}/g).join('-'); 
+                } else {
+                    finalSN = snParts[0].trim();
+                }
+
+                // 2. Ambil Nama Pelanggan (Bagian setelah garis miring pertama)
+                if (snParts.length > 1) {
+                    let namaAsli = snParts[1].trim();
+                    htmlNama = `<div class="item"><span>Nama</span> <span>${namaAsli}</span></div>`;
+                }
+            }
+        }
+        // 👆 ========================================= 👆
+
         // Desain HTML Struk Thermal HD
         const htmlContent = `
         <html>
@@ -67,14 +99,15 @@ app.get('/generate-resi', async (req, res) => {
             <div class="line"></div>
             <div class="center bold" style="font-size: 20px; margin-bottom: 20px;">STRUK PEMBELIAN</div>
             
-            <div class="item"><span>ID Trans</span> <span>${id || '-'}</span></div>
+            ${htmlNama}
+            <div class="item"><span>ID Transaksi</span> <span>${id || '-'}</span></div>
             <div class="item"><span>Produk</span> <span>${produk || '-'}</span></div>
-            <div class="item"><span>No Tujuan</span> <span>${nohp || '-'}</span></div>
+            <div class="item"><span>${labelTujuan}</span> <span>${nohp || '-'}</span></div>
             <div class="item"><span>Harga</span> <span class="bold">Rp ${harga || '-'}</span></div>
             
             <div class="line"></div>
-            <div class="center" style="font-size: 14px;">SERIAL NUMBER (SN)</div>
-            <div class="sn-box">${sn || '-'}</div>
+            <div class="center" style="font-size: 14px;">${labelSN}</div>
+            <div class="sn-box">${finalSN}</div>
             
             <div class="line"></div>
             <div class="center bold" style="font-size: 16px;">TERIMA KASIH</div>
