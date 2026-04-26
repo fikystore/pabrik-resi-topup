@@ -23,6 +23,12 @@ async function getBrowser() {
     return browserInstance;
 }
 
+// 👇 INI DIA PINTU KHUSUS BUAT CRON-JOB BOS 👇
+app.get('/', (req, res) => {
+    res.status(200).send('RESI SIAP BOSSS');
+});
+// 👆 ========================================== 👆
+
 app.get('/generate-resi', async (req, res) => {
     let page;
     try {
