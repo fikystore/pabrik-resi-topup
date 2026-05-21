@@ -167,11 +167,34 @@ function crc16(data) {
 }
 
 function generateQrisString(nominal) {
-  const qrisBase = '00020101021226570011ID.DANA.WWW011893600915335451262702093545126270303UMI51440014ID.CO.QRIS.WWW0215ID10222268794610303UMI52045732530336055802ID5910Fiky Store6012Kab. Sumenep6105694626304';
-  const nomStr = String(Math.round(nominal));
-  const field54 = '54' + String(nomStr.length).padStart(2, '0') + nomStr;
-  const qrisBaru = qrisBase.replace('5802ID', field54 + '5802ID');
-  return qrisBaru + crc16(qrisBaru);
+
+  const qrisStatic = '00020101021126570011ID.DANA.WWW011893600915335451262702093545126270303UMI51440014ID.CO.QRIS.WWW0215ID10222268794610303UMI5204573253033605802ID5910Fiky Store6012Kab. Sumenep61056946263044625';
+
+  // hapus CRC lama
+  let qris = qrisStatic.slice(0, -4);
+
+  // ubah static jadi dynamic
+  qris = qris.replace('010211', '010212');
+
+  // nominal
+  const amount = parseInt(nominal).toString();
+
+  // field 54
+  const field54 =
+    '54' +
+    amount.length.toString().padStart(2, '0') +
+    amount;
+
+  // sisip nominal sebelum country code
+  qris = qris.replace('5802ID', field54 + '5802ID');
+
+  // tambahkan tag CRC
+  qris += '6304';
+
+  // hitung CRC baru
+  const crc = crc16(qris);
+
+  return qris + crc;
 }
 
 function loadQR(nominal) {
