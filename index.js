@@ -167,11 +167,11 @@ function crc16(data) {
 }
 
 function generateQrisString(nominal) {
-   const qrisBase = '00020101021126570011ID.DANA.WWW011893600915335451262702093545126270303UMI51440014ID.CO.QRIS.WWW0215ID10222268794610303UMI52045732530336055802ID5910Fiky Store6012Kab. Sumenep61056946';
-const nomStr = String(Math.round(nominal));
-const field54 = '54' + String(nomStr.length).padStart(2, '0') + nomStr;
-const qrisBaru = qrisBase.replace('5802ID', field54 + '5802ID');
-return qrisBaru + '6300' + crc16(qrisBaru + '6300');
+  const qrisBase = '00020101021226570011ID.DANA.WWW011893600915335451262702093545126270303UMI51440014ID.CO.QRIS.WWW0215ID10222268794610303UMI52045732530336055802ID5910Fiky Store6012Kab. Sumenep6105694626304';
+  const nomStr = String(Math.round(nominal));
+  const field54 = '54' + String(nomStr.length).padStart(2, '0') + nomStr;
+  const qrisBaru = qrisBase.replace('5802ID', field54 + '5802ID');
+  return qrisBaru + crc16(qrisBaru);
 }
 
 function loadQR(nominal) {
