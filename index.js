@@ -6,7 +6,7 @@ let browserInstance = null;
 
 // Fungsi sakti biar browser tetep standby & hemat RAM
 async function getBrowser() {
-    if (!browserInstance || !browserInstance.isConnected()) {
+    if (!browserInstance || !browserInstance.process()) {
         browserInstance = await puppeteer.launch({
             args: [
                 '--no-sandbox', 
