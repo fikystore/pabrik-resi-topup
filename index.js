@@ -167,70 +167,42 @@ function crc16(data) {
 }
 
 function generateQrisString(nominal) {
-
   const qrisStatic = "00020101021126570011ID.DANA.WWW011893600915335451262702093545126270303UMI51440014ID.CO.QRIS.WWW0215ID10222268794610303UMI5204573253033605802ID5910Fiky Store6012Kab. Sumenep61056946263044625";
 
-  // buang CRC lama
-  let qris = qrisStatic.slice(0, -4);
+  let qris = qrisStatic.slice(0, -8); // ✅ GANTI -4 jadi -8
 
-  // ubah static -> dynamic
   qris = qris.replace("010211", "010212");
 
-  // nominal
   nominal = parseInt(nominal).toString();
+  const amountField = "54" + nominal.length.toString().padStart(2, "0") + nominal;
+  qris = qris.replace("5802ID", amountField + "5802ID");
 
-  // field 54
-  const amountField =
-    "54" +
-    nominal.length.toString().padStart(2, "0") +
-    nominal;
-
-  // sisip sebelum negara
-  qris = qris.replace(
-    "5802ID",
-    amountField + "5802ID"
-  );
-
-  // tambahkan tag CRC
   qris += "6304";
-
-  // hitung CRC
-  const crc = crc16(qris);
-
-  return qris + crc;
+  return qris + crc16(qris);
 }
 
-function loadQR(nominal) {
-  const script = document.createElement('script');
-  script.src = 'https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js';
-  script.onload = function() {
-    script.onload = function() {
-
-    const qrisStr = generateQrisString(nominal);
-
-    console.log(qrisStr);
-
-    const wrapper = document.getElementById('qr-canvas').parentNode;
-    const oldCanvas = document.getElementById('qr-canvas');
-    const div = document.createElement('div');
-    div.id = 'qr-div';
-    div.style.width = '440px';
-    div.style.height = '440px';
-    wrapper.replaceChild(div, oldCanvas);
-
-    new QRCode(div, { text: qrisStr, width: 440, height: 440, colorDark: '#000000', colorLight: '#ffffff', correctLevel: QRCode.CorrectLevel.M });
-
-    setTimeout(() => {
-      const img = div.querySelector('img');
-      if (img) { img.style.width = '440px'; img.style.height = '440px'; }
-    }, 200);
-  };
-  document.head.appendChild(script);
-}
-
+// ✅ GANTI loadQR dengan versi fix
 const nominalData = ${nominal};
 document.getElementById('nominal-display').innerText = 'Rp ' + parseInt(nominalData).toLocaleString('id-ID');
-loadQR(nominalData);
+
+const script = document.createElement('script');
+script.src = 'https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js';
+script.onload = function() {
+  const qrisStr = generateQrisString(nominalData);
+  const wrapper = document.getElementById('qr-canvas').parentNode;
+  const oldCanvas = document.getElementById('qr-canvas');
+  const div = document.createElement('div');
+  div.id = 'qr-div';
+  div.style.width = '440px';
+  div.style.height = '440px';
+  wrapper.replaceChild(div, oldCanvas);
+  new QRCode(div, { text: qrisStr, width: 440, height: 440, colorDark: '#000000', colorLight: '#ffffff', correctLevel: QRCode.CorrectLevel.M });
+  setTimeout(() => {
+    const img = div.querySelector('img');
+    if (img) { img.style.width = '440px'; img.style.height = '440px'; }
+  }, 200);
+};
+document.head.appendChild(script);
 </script>
 </body>
 </html>
